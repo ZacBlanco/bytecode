@@ -118,17 +118,25 @@ public class DynamicClassLoader
                 // not a local class
             }
 
-            if (overrideClassLoader.isPresent()) {
-                try {
-                    return resolveClass(overrideClassLoader.get().loadClass(name), resolve);
-                }
-                catch (ClassNotFoundException e) {
-                    // not in override loader
-                }
-            }
-
-            Class<?> clazz = getParent().loadClass(name);
-            return resolveClass(clazz, resolve);
+            return overrideClassLoader
+                    .<Class<?>>map(loader -> {
+                        try {
+                            return resolveClass(loader.loadClass(name), resolve);
+                        }
+                        catch (ClassNotFoundException e) {
+                            return null;
+                        }
+                    })
+                    .orElseGet(() -> {
+                        Class<?> clazz;
+                        try {
+                            clazz = getParent().loadClass(name);
+                            return resolveClass(clazz, resolve);
+                        }
+                        catch (ClassNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
     }
 

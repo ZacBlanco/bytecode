@@ -27,12 +27,13 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.facebook.airlift.bytecode.Access.STATIC;
 import static com.facebook.airlift.bytecode.Access.toAccessModifier;
 import static com.facebook.airlift.bytecode.ParameterizedType.type;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.objectweb.asm.Opcodes.RETURN;
 
 @SuppressWarnings("UnusedDeclaration")
@@ -85,7 +86,9 @@ public class MethodDefinition
         }
         this.parameters = ImmutableList.copyOf(parameters);
         this.parameterTypes = Lists.transform(this.parameters, Parameter::getType);
-        this.parameterAnnotations = ImmutableList.copyOf(transform(parameters, input -> new ArrayList<>()));
+        this.parameterAnnotations = Stream.of(parameters)
+                .<List<AnnotationDefinition>>map(input -> new ArrayList<>())
+                .collect(toImmutableList());
         Optional<ParameterizedType> thisType = Optional.empty();
         if (!declaringClass.isInterface() && !access.contains(STATIC)) {
             thisType = Optional.of(declaringClass.getType());
@@ -264,7 +267,7 @@ public class MethodDefinition
         Joiner.on(' ').appendTo(sb, access).append(' ');
         sb.append(returnType.getJavaClassName()).append(' ');
         sb.append(name).append('(');
-        Joiner.on(", ").appendTo(sb, transform(parameters, Parameter::getSourceString)).append(')');
+        Joiner.on(", ").appendTo(sb, parameters.stream().map(Parameter::getSourceString).iterator()).append(')');
         return sb.toString();
     }
 
@@ -299,7 +302,7 @@ public class MethodDefinition
     {
         StringBuilder sb = new StringBuilder();
         sb.append("(");
-        Joiner.on("").appendTo(sb, transform(parameterTypes, ParameterizedType::getType));
+        Joiner.on("").appendTo(sb, parameterTypes.stream().map(ParameterizedType::getType).iterator());
         sb.append(")");
         sb.append(returnType.getType());
         return sb.toString();

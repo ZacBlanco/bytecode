@@ -21,6 +21,7 @@ import com.facebook.airlift.bytecode.OpCode;
 import com.facebook.airlift.bytecode.ParameterizedType;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -28,6 +29,7 @@ import org.objectweb.asm.Opcodes;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.facebook.airlift.bytecode.MethodDefinition.methodDescription;
@@ -38,7 +40,7 @@ import static com.facebook.airlift.bytecode.OpCode.INVOKESTATIC;
 import static com.facebook.airlift.bytecode.OpCode.INVOKEVIRTUAL;
 import static com.facebook.airlift.bytecode.ParameterizedType.type;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnusedDeclaration")
@@ -158,12 +160,12 @@ public class InvokeInstruction
 
     public static InstructionNode invokeConstructor(Class<?> target, Class<?>... parameterTypes)
     {
-        return invokeConstructor(type(target), transform(ImmutableList.copyOf(parameterTypes), ParameterizedType::type));
+        return invokeConstructor(type(target), Arrays.stream(parameterTypes).map(ParameterizedType::type).collect(toImmutableList()));
     }
 
     public static InstructionNode invokeConstructor(Class<?> target, Iterable<Class<?>> parameterTypes)
     {
-        return invokeConstructor(type(target), transform(parameterTypes, ParameterizedType::type));
+        return invokeConstructor(type(target), Streams.stream(parameterTypes).map(ParameterizedType::type).collect(toImmutableList()));
     }
 
     public static InstructionNode invokeConstructor(ParameterizedType target, ParameterizedType... parameterTypes)
@@ -220,7 +222,7 @@ public class InvokeInstruction
                 type(method.getDeclaringClass()),
                 method.getName(),
                 type(method.getReturnType()),
-                transform(ImmutableList.copyOf(method.getParameterTypes()), ParameterizedType::type));
+                ImmutableList.copyOf(method.getParameterTypes()).stream().map(ParameterizedType::type).collect(toImmutableList()));
     }
 
     private static InstructionNode invoke(OpCode invocationType, MethodDefinition method)
@@ -247,7 +249,7 @@ public class InvokeInstruction
                 type(target),
                 name,
                 type(returnType),
-                transform(parameterTypes, ParameterizedType::type));
+                Streams.stream(parameterTypes).map(ParameterizedType::type).collect(toImmutableList()));
     }
 
     //
@@ -287,7 +289,7 @@ public class InvokeInstruction
     {
         return new InvokeDynamicInstruction(name,
                 type(methodType.returnType()),
-                transform(methodType.parameterList(), ParameterizedType::type),
+                methodType.parameterList().stream().map(ParameterizedType::type).collect(toImmutableList()),
                 bootstrapMethod,
                 ImmutableList.copyOf(bootstrapArguments));
     }
@@ -299,7 +301,7 @@ public class InvokeInstruction
     {
         return new InvokeDynamicInstruction(name,
                 type(methodType.returnType()),
-                transform(methodType.parameterList(), ParameterizedType::type),
+                methodType.parameterList().stream().map(ParameterizedType::type).collect(toImmutableList()),
                 bootstrapMethod,
                 ImmutableList.copyOf(bootstrapArguments));
     }

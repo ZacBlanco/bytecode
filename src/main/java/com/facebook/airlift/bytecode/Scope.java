@@ -41,13 +41,10 @@ public class Scope
     // This can only be constructed by a method definition
     Scope(Optional<ParameterizedType> thisType, Iterable<Parameter> parameters)
     {
-        if (thisType.isPresent()) {
-            thisVariable = new Variable("this", thisType.get());
+        thisVariable = thisType.map(var -> new Variable("this", var)).orElse(null);
+        if (thisVariable != null) {
             variables.put("this", thisVariable);
             allVariables.add(thisVariable);
-        }
-        else {
-            thisVariable = null;
         }
 
         for (Parameter parameter : parameters) {

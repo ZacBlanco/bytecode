@@ -35,12 +35,12 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.facebook.airlift.bytecode.ParameterizedType.type;
 import static com.facebook.airlift.bytecode.ParameterizedType.typeFromPathName;
-import static com.google.common.collect.Iterables.transform;
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -61,8 +61,8 @@ public class ClassInfo
                 typeFromPathName(classNode.name),
                 classNode.access,
                 classNode.superName == null ? null : typeFromPathName(classNode.superName),
-                transform((List<String>) classNode.interfaces, ParameterizedType::typeFromPathName),
-                (List<MethodNode>) classNode.methods);
+                classNode.interfaces.stream().map(ParameterizedType::typeFromPathName).collect(Collectors.toList()),
+                classNode.methods);
     }
 
     public ClassInfo(ClassInfoLoader loader, Class<?> aClass)
@@ -71,7 +71,7 @@ public class ClassInfo
                 type(aClass),
                 aClass.getModifiers(),
                 aClass.getSuperclass() == null ? null : type(aClass.getSuperclass()),
-                transform(asList(aClass.getInterfaces()), ParameterizedType::type),
+                Arrays.stream(aClass.getInterfaces()).map(ParameterizedType::type).collect(Collectors.toList()),
                 null);
     }
 
