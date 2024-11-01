@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.facebook.airlift</groupId>
+        <groupId>com.github.zacblanco.airbase</groupId>
         <artifactId>airbase</artifactId>
-        <version>104-SNAPSHOT</version>
+        <version>upgradeJava21Jitpack-SNAPSHOT</version>
     </parent>
 
     <artifactId>bytecode</artifactId>
@@ -15,6 +15,20 @@
     <url>https://github.com/prestodb/bytecode</url>
 
     <inceptionYear>2012</inceptionYear>
+
+    <repositories>
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jitpack</id>
+            <url>https://jitpack.io</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
         <air.check.skip-spotbugs>true</air.check.skip-spotbugs>
